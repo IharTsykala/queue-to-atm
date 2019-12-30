@@ -11,8 +11,9 @@ class Person {
   constructor(id) {
     this.id = id
   }
-  serveTime() {
-    return Math.random() * 1000
+  serveTime(min, max) {
+    let rand = min - 0.5 + Math.random() * (max - min + 1);
+    return Math.round(rand)*1000;
   }
   viewPerson() {   
     const person = document.createElement('div')
@@ -38,7 +39,6 @@ class Controller {
     this.model.startQueue()
   }
 }
-
 class Model {
   constructor(view) {
     this.view = view
@@ -47,10 +47,16 @@ class Model {
     this.arrATM = [0,0,0]
     this.numberATM = 1
   }
+
+  randomTime(min, max) {    
+    let rand = min - 0.5 + Math.random() * (max - min + 1);
+    return Math.round(rand)*2000;
+  }
+
   startQueue() {   
     this.timerId = setInterval(() => {
       this.createPerson()      
-    }, Math.random() * 1000)   
+    }, this.randomTime(0.5,1.5))   
   }
 
   createATM() {
@@ -63,7 +69,7 @@ class Model {
     this.queue = this.queue.concat(person)
     this.view.addPersonView(person)
     this.idPerson++
-    if (this.idPerson > 20) {
+    if (this.idPerson > 10) {
       clearInterval(this.timerId, 0)
       this.checkFree2()
     }
@@ -84,9 +90,10 @@ class Model {
 
   checkFree () {        
         this.arrATM.forEach(item => {
-          if (!item.state && this.queue[0]) {                
+          if (!item.state && this.queue[0]) {
+            const deletePerson = this.queue[0]              
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), 3000)
+            setTimeout(() => item.changeState(), this.randomTime(1,5))
           }
         })
         console.log(this.queue)           
@@ -104,8 +111,9 @@ class Model {
       const timerId = setInterval(() => {
         this.arrATM.forEach(item => {
           if (!item.state && this.queue[0]) {
+            const deletePerson = this.queue[0]
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), 3000)
+            setTimeout(() => item.changeState(), this.randomTime(1,5))
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
@@ -166,8 +174,7 @@ class View {
 
   serveATM(person, currentATM) {    
     for(let i = 0; i < this.atmBlock.children.length; i++) {
-      this.atmBlock.children[i].classList.remove("currentATM")
-      // this.atmBlock.children[i].innerText='free'
+      this.atmBlock.children[i].classList.remove("currentATM")      
     } 
     this.atmBlock.children[currentATM.number-1].classList.add("currentATM")
     this.atmBlock.children[currentATM.number-1].innerText=person.id
