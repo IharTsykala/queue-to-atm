@@ -44,7 +44,8 @@ class Model {
     this.view = view
     this.queue = []
     this.idPerson = 1
-    this.arrATM = [0,0,0]
+    this.amountATM = 3
+    this.arrATM=[]
     this.numberATM = 1
   }
 
@@ -56,13 +57,15 @@ class Model {
   startQueue() {   
     this.timerId = setInterval(() => {
       this.createPerson()      
-    }, this.randomTime(0.5,1.5))   
+    }, this.randomTime(0.5,1.2))   
   }
 
   createATM() {
-    this.arrATM = this.arrATM.map(() => new ModelATM(this.numberATM++))
-    this.view.createATM(this.arrATM)
+    for(let i = 0; i<this.amountATM; i++) {
+    this.arrATM =this.arrATM.concat([new ModelATM(this.numberATM++)])
   }
+  this.view.createATM(this.arrATM)
+}
 
   createPerson() {
     const person = new Person(this.idPerson)
@@ -102,7 +105,8 @@ class Model {
   clearModel() {
     this.queue = []
     this.idPerson = 1
-    this.arrATM = [0,0,0]
+    this.amountATM = 3
+    this.arrATM=[]
     this.numberATM = 1
   }
 
