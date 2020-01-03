@@ -34,19 +34,19 @@ class Controller {
     this.buttonStart.addEventListener("click", () => this.startQueue())
 
     this.buttonStop = wrapper.querySelector(".stop")
-    this.buttonStop.addEventListener('click',()=> this.stopQueue())
-    
+    this.buttonStop.addEventListener("click", () => this.stopQueue())
+
     this.buttonPlusATM = wrapper.querySelector(".plusATM")
     this.buttonPlusATM.addEventListener("click", () => this.model.plusATM())
 
     this.buttonMinusATM = wrapper.querySelector(".minusATM")
-    this.buttonMinusATM.addEventListener('click',()=> this.model.minusATM())
+    this.buttonMinusATM.addEventListener("click", () => this.model.minusATM())
   }
 
   startQueue() {
     this.model.stopQueue()
     this.model.createATM()
-    this.model.startQueue()    
+    this.model.startQueue()
   }
 
   stopQueue() {
@@ -60,48 +60,25 @@ class Model {
     this.idPerson = 1
     this.amountATM = 3
     this.arrATM = []
-    this.numberATM = 1    
+    this.numberATM = 1
   }
 
-  randomTime(min, max) {
-    let rand = min+ - 0.5 + Math.random() * (max - min + 1)
-    return Math.round(rand) * 2000
+  createATM() {
+    for (let i = 0; i < this.amountATM; i++) {
+      this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
+    }
+    this.view.createFirstATM(this.arrATM)
   }
 
   startQueue() {
     this.timerId = setInterval(() => {
-      this.createPerson()      
-    }, this.randomTime(0.1,1.0))   
+      this.createPerson()
+    }, this.randomTime(0.1, 1.0))
   }
 
-  stopQueue() {    
-    clearInterval(this.timerId, 0)
-    this.clearModel();
-    console.log(this.arrATM);
-    this.view.deleteBlocks();
-    this.view.createBlockATM();
-    this.view.createBlockQueue();
-  }
-
-  createATM() {
-    for(let i = 0; i<this.amountATM; i++) {
-    this.arrATM =this.arrATM.concat([new ModelATM(this.numberATM++)])
-    }
-    this.view.createArrATM(this.arrATM)
-  }
-
-  plusATM() {    
-    this.arrATM =this.arrATM.concat([new ModelATM(this.numberATM++)])
-    // this.amountATM++
-    console.log(this.arrATM)
-    this.view.plusATM(this.arrATM)    
-  }
-
-  minusATM() {    
-    this.arrATM.pop()
-    this.numberATM++
-    this.view.minusATM(this.arrATM)
-    console.log(this.numberATM)
+  randomTime(min, max) {
+    let rand = min + -0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand) * 2000
   }
 
   createPerson() {
@@ -114,37 +91,28 @@ class Model {
       this.checkFree2()
     }
     console.log(this.queue)
+    // if queue have first member
     if (this.queue.length) {
       this.checkFree()
     }
   }
 
-  checkFreeBase(item) {
+  checkFreeBase(currentServeATM) {
     const deletePerson = this.queue.shift()
-    this.view.deletePersonView(deletePerson)
-    item.changeState()
-    this.view.serveATM(deletePerson, item)
+    this.view.deletePersonView()
+    currentServeATM.changeState()
+    this.view.goToATM(deletePerson, currentServeATM)
     console.log(deletePerson)
   }
 
   checkFree() {
-    this.arrATM.forEach(item => {
-      if (!item.state && this.queue[0]) {
-        const deletePerson = this.queue[0]
-        this.checkFreeBase(item)
-        setTimeout(() => item.changeState(), this.randomTime(2, 5))
+    this.arrATM.forEach(currentATM => {
+      if (!currentATM.state && this.queue[0]) {
+        this.checkFreeBase(currentATM)
+        setTimeout(() => currentATM.changeState(), this.randomTime(2, 5))
       }
     })
     console.log(this.queue)
-  }
-
-  clearModel() {
-    console.log(this)    
-    this.queue = []
-    this.idPerson = 1
-    this.amountATM = 3
-    this.arrATM=[]
-    this.numberATM = 1    
   }
 
   checkFree2() {
@@ -164,6 +132,38 @@ class Model {
         })
       })
     }
+  }
+
+  stopQueue() {
+    clearInterval(this.timerId, 0)
+    this.clearModel()
+    console.log(this.arrATM)
+    this.view.deleteBlocks()
+    this.view.createBlockATM()
+    this.view.createBlockQueue()
+  }
+
+  plusATM() {
+    this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
+    // this.amountATM++
+    console.log(this.arrATM)
+    this.view.plusATM(this.arrATM)
+  }
+
+  minusATM() {
+    this.arrATM.pop()
+    this.numberATM++
+    this.view.minusATM(this.arrATM)
+    console.log(this.numberATM)
+  }
+
+  clearModel() {
+    console.log(this)
+    this.queue = []
+    this.idPerson = 1
+    this.amountATM = 3
+    this.arrATM = []
+    this.numberATM = 1
   }
 }
 
@@ -193,7 +193,6 @@ class View {
     this.buttons.append(this.buttonStop)
     this.buttonStop.innerText = "minusATM"
 
-
     this.createBlockATM()
     this.createBlockQueue()
   }
@@ -210,13 +209,7 @@ class View {
     wrapper.appendChild(this.queue)
   }
 
-  createATM() {
-    const atm = document.createElement("div")
-    atm.className = "atm"
-    this.atmBlock.append(atm)
-  }
-
-  createArrATM(arrATM) {
+  createFirstATM(arrATM) {
     if (!this.atmBlock.children.length) {
       arrATM.forEach(() => {
         this.createATM()
@@ -224,27 +217,33 @@ class View {
     }
   }
 
-  deleteBlocks(arr) {
-  this.atmBlock.remove()
-  this.queue.remove();
+  createATM() {
+    const atm = document.createElement("div")
+    atm.className = "atm"
+    this.atmBlock.append(atm)
   }
 
   addPersonView(newPerson) {
-    const person = newPerson
-    this.queue.append(person.viewPerson())
+    this.queue.append(newPerson.viewPerson())
+  }
+
+  goToATM(person, currentServeATM) {
+    for (let i = 0; i < this.atmBlock.children.length; i++) {
+      this.atmBlock.children[i].classList.remove("currentATM")
+    }
+    this.atmBlock.children[currentServeATM.number - 1].classList.add(
+      "currentATM"
+    )
+    this.atmBlock.children[currentServeATM.number - 1].innerText = person.id
+  }
+
+  deleteBlocks(arr) {
+    this.atmBlock.remove()
+    this.queue.remove()
   }
 
   deletePersonView() {
     this.queue.children[0].remove()
-  }
-
-  serveATM(person, currentATM) {
-    console.log(this.atmBlock.children.length)
-    for (let i = 0; i < this.atmBlock.children.length; i++) {
-      this.atmBlock.children[i].classList.remove("currentATM")
-    }
-    this.atmBlock.children[currentATM.number - 1].classList.add("currentATM")
-    this.atmBlock.children[currentATM.number - 1].innerText = person.id
   }
 
   plusATM() {
@@ -253,7 +252,7 @@ class View {
 
   minusATM() {
     // console.log()
-    this.atmBlock.children[this.atmBlock.children.length-1].remove()
+    this.atmBlock.children[this.atmBlock.children.length - 1].remove()
   }
 }
 
