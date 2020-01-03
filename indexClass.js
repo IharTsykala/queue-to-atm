@@ -12,25 +12,25 @@ class Person {
     this.id = id
   }
   serveTime(min, max) {
-    let rand = min - 0.5 + Math.random() * (max - min + 1);
-    return Math.round(rand)*1000;
+    let rand = min - 0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand) * 1000
   }
-  viewPerson() {   
-    const person = document.createElement('div')
+  viewPerson() {
+    const person = document.createElement("div")
     person.className = `person${this.id}`
-    person.innerHTML = this.id 
+    person.innerHTML = this.id
     return person
   }
 }
 
-const wrapper = document.getElementById('wrapper')
+const wrapper = document.getElementById("wrapper")
 class Controller {
   constructor(model, wrapper) {
-    this.wrapper = wrapper   
+    this.wrapper = wrapper
     this.model = model
   }
   start() {
-    this.buttonStart = wrapper.querySelector('.start')     
+    this.buttonStart = wrapper.querySelector(".start")
     this.buttonStart.addEventListener("click", () => this.startQueue())
   }
 
@@ -45,17 +45,22 @@ class Model {
     this.queue = []
     this.idPerson = 1
     this.amountATM = 3
+<<<<<<< HEAD
     this.arrATM=[]
+=======
+    this.arrATM = []
+>>>>>>> a35f9e3d2c89d95b85734c027e3bf88ab4ca7715
     this.numberATM = 1
   }
 
-  randomTime(min, max) {    
-    let rand = min - 0.5 + Math.random() * (max - min + 1);
-    return Math.round(rand)*2000;
+  randomTime(min, max) {
+    let rand = min - 0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand) * 2000
   }
 
-  startQueue() {   
+  startQueue() {
     this.timerId = setInterval(() => {
+<<<<<<< HEAD
       this.createPerson()      
     }, this.randomTime(0.5,1.2))   
   }
@@ -63,6 +68,17 @@ class Model {
   createATM() {
     for(let i = 0; i<this.amountATM; i++) {
     this.arrATM =this.arrATM.concat([new ModelATM(this.numberATM++)])
+=======
+      this.createPerson()
+    }, this.randomTime(0.5, 1.2))
+  }
+
+  createATM() {
+    for (let i = 0; i < this.amountATM; i++) {
+      this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
+    }
+    this.view.createATM(this.arrATM)
+>>>>>>> a35f9e3d2c89d95b85734c027e3bf88ab4ca7715
   }
   this.view.createATM(this.arrATM)
 }
@@ -77,13 +93,12 @@ class Model {
       this.checkFree2()
     }
     console.log(this.queue)
-    if(this.queue.length) {
-    
-    this.checkFree()
+    if (this.queue.length) {
+      this.checkFree()
     }
   }
 
-  checkFreeBase (item) {
+  checkFreeBase(item) {
     const deletePerson = this.queue.shift()
     this.view.deletePersonView(deletePerson)
     item.changeState()
@@ -91,45 +106,49 @@ class Model {
     console.log(deletePerson)
   }
 
-  checkFree () {        
-        this.arrATM.forEach(item => {
-          if (!item.state && this.queue[0]) {
-            const deletePerson = this.queue[0]              
-            this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), this.randomTime(1,5))
-          }
-        })
-        console.log(this.queue)           
+  checkFree() {
+    this.arrATM.forEach(item => {
+      if (!item.state && this.queue[0]) {
+        const deletePerson = this.queue[0]
+        this.checkFreeBase(item)
+        setTimeout(() => item.changeState(), this.randomTime(1, 5))
+      }
+    })
+    console.log(this.queue)
   }
 
   clearModel() {
     this.queue = []
     this.idPerson = 1
     this.amountATM = 3
+<<<<<<< HEAD
     this.arrATM=[]
+=======
+    this.arrATM = []
+>>>>>>> a35f9e3d2c89d95b85734c027e3bf88ab4ca7715
     this.numberATM = 1
   }
 
-  checkFree2 ()  {
+  checkFree2() {
     if (this.queue.length) {
       const timerId = setInterval(() => {
         this.arrATM.forEach(item => {
           if (!item.state && this.queue[0]) {
             const deletePerson = this.queue[0]
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), this.randomTime(1,5))
+            setTimeout(() => item.changeState(), this.randomTime(1, 5))
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
               this.clearModel()
             }
-          }     
-        })      
+          }
+        })
       })
     }
   }
 }
-  
+
 class View {
   constructor(wrapper) {
     this.wrapper = wrapper
@@ -139,50 +158,50 @@ class View {
     this.buttons = document.createElement("div")
     this.buttons.className = "buttons"
     this.wrapper.appendChild(this.buttons)
-    this.buttonStart = document.createElement('button')
-    this.buttonStart.className = 'start'    
+    this.buttonStart = document.createElement("button")
+    this.buttonStart.className = "start"
     this.buttons.append(this.buttonStart)
-    this.buttonStart.innerText = 'Start'
-    this.buttonStop = document.createElement('button')
-    this.buttonStop.className = 'stop'
+    this.buttonStart.innerText = "Start"
+    this.buttonStop = document.createElement("button")
+    this.buttonStop.className = "stop"
     this.buttons.append(this.buttonStop)
-    this.buttonStop.innerText = 'Stop'
+    this.buttonStop.innerText = "Stop"
 
     this.atmBlock = document.createElement("div")
-    this.atmBlock .className = "atmBlock"
-    wrapper.appendChild(this.atmBlock )
+    this.atmBlock.className = "atmBlock"
+    wrapper.appendChild(this.atmBlock)
 
     this.queue = document.createElement("div")
     this.queue.className = "queue"
     wrapper.appendChild(this.queue)
   }
 
-  createATM(arrATM) {    
-    if(!this.atmBlock.children.length) {
-      arrATM.forEach(()=> {        
-        const atm = document.createElement('div')
-        atm.className = 'atm'
+  createATM(arrATM) {
+    if (!this.atmBlock.children.length) {
+      arrATM.forEach(() => {
+        const atm = document.createElement("div")
+        atm.className = "atm"
         this.atmBlock.append(atm)
-      } )
-    }    
+      })
     }
-
-  addPersonView(newPerson) {   
-  const person = newPerson
-  this.queue.append(person.viewPerson())
   }
 
-  deletePersonView() {    
-    this.queue.children[0].remove();
+  addPersonView(newPerson) {
+    const person = newPerson
+    this.queue.append(person.viewPerson())
   }
 
-  serveATM(person, currentATM) {    
-    for(let i = 0; i < this.atmBlock.children.length; i++) {
-      this.atmBlock.children[i].classList.remove("currentATM")      
-    } 
-    this.atmBlock.children[currentATM.number-1].classList.add("currentATM")
-    this.atmBlock.children[currentATM.number-1].innerText=person.id
- } 
+  deletePersonView() {
+    this.queue.children[0].remove()
+  }
+
+  serveATM(person, currentATM) {
+    for (let i = 0; i < this.atmBlock.children.length; i++) {
+      this.atmBlock.children[i].classList.remove("currentATM")
+    }
+    this.atmBlock.children[currentATM.number - 1].classList.add("currentATM")
+    this.atmBlock.children[currentATM.number - 1].innerText = person.id
+  }
 }
 
 const view = new View(wrapper)
