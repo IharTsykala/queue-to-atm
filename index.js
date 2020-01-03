@@ -1,120 +1,188 @@
-let queue = [];
-let id = 1;
-let arrATM = [0];
-
-const serveClient = ()=> {
-  const deletePerson = queue.shift()
-}
 class ModelATM {
   constructor(number) {
-    this.number = number;
-    this.state = false;
+    this.number = number
+    this.state = false
   }
-  changeState() { 
-    this.state=!this.state
-  }
-
-checkFreeBase =()=> {   
-    const deletePerson = queue.shift()
-    item.changeState()
-    console.log(deletePerson)
-}
-
-  checkFree = ()=> {   
-    arrATM.forEach((item)=>{     
-      if(!item.state) {      
-        this.checkFreeBase()
-       setTimeout(()=>item.changeState(),1000)     
-      }    
-    }) 
-    console.log(queue)  
-  }
-
-  checkFree2 = ()=> {
-    if(queue.length) {
-      if(queue.length) {
-        const timerId = setInterval(()=>{
-          arrATM.forEach((item)=>{     
-            if(!item.state) { 
-            checkFreeBase(item)          
-            setTimeout(()=>item.changeState(),2000)
-            if(!queue.length) clearInterval(timerId, 0)   
-            }    
-          })   
-      })     
-       }
-     } 
+  changeState() {
+    this.state = !this.state
   }
 }
-
-const createATM = ()=> {  
-  arrATM = arrATM.map(()=>new ModelATM)    
-}
-
-createATM();
 class Person {
   constructor(id) {
     this.id = id
   }
-  serveTime() {   
-    return Math.random() * 1000
+  serveTime(min, max) {
+    let rand = min - 0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand) * 1000
+  }
+  viewPerson() {
+    const person = document.createElement("div")
+    person.className = `person${this.id}`
+    person.innerHTML = this.id
+    return person
   }
 }
 
-class App {
-  constructor() {
-    let queue = []
-    let id = 1
-    let arrATM = [0];
+const wrapper = document.getElementById("wrapper")
+class Controller {
+  constructor(model, wrapper) {
+    this.wrapper = wrapper
+    this.model = model
+  }
+  start() {
+    this.buttonStart = wrapper.querySelector(".start")
+    this.buttonStart.addEventListener("click", () => this.startQueue())
   }
 
-  createATM = ()=> {  
-    arrATM = arrATM.map(()=>new ModelATM)    
-  } 
+  startQueue() {
+    this.model.createATM()
+    this.model.startQueue()
+  }
+}
+class Model {
+  constructor(view) {
+    this.view = view
+    this.queue = []
+    this.idPerson = 1
+    this.arrATM = [0, 0, 0]
+    this.numberATM = 1
+  }
 
+  randomTime(min, max) {
+    let rand = min - 0.5 + Math.random() * (max - min + 1)
+    return Math.round(rand) * 2000
+  }
+
+  startQueue() {
+    this.timerId = setInterval(() => {
+      this.createPerson()
+    }, this.randomTime(0.5, 1.5))
+  }
+
+  createATM() {
+    this.arrATM = this.arrATM.map(() => new ModelATM(this.numberATM++))
+    this.view.createATM(this.arrATM)
+  }
+
+  createPerson() {
+    const person = new Person(this.idPerson)
+    this.queue = this.queue.concat(person)
+    this.view.addPersonView(person)
+    this.idPerson++
+    if (this.idPerson > 10) {
+      clearInterval(this.timerId, 0)
+      this.checkFree2()
+    }
+    console.log(this.queue)
+    if (this.queue.length) {
+      this.checkFree()
+    }
+  }
+
+  checkFreeBase(item) {
+    const deletePerson = this.queue.shift()
+    this.view.deletePersonView(deletePerson)
+    item.changeState()
+    this.view.serveATM(deletePerson, item)
+    console.log(deletePerson)
+  }
+
+  checkFree() {
+    this.arrATM.forEach(item => {
+      if (!item.state && this.queue[0]) {
+        const deletePerson = this.queue[0]
+        this.checkFreeBase(item)
+        setTimeout(() => item.changeState(), this.randomTime(1, 5))
+      }
+    })
+    console.log(this.queue)
+  }
+
+  clearModel() {
+    this.queue = []
+    this.idPerson = 1
+    this.arrATM = [0, 0, 0]
+    this.numberATM = 1
+  }
+
+  checkFree2() {
+    if (this.queue.length) {
+      const timerId = setInterval(() => {
+        this.arrATM.forEach(item => {
+          if (!item.state && this.queue[0]) {
+            const deletePerson = this.queue[0]
+            this.checkFreeBase(item)
+            setTimeout(() => item.changeState(), this.randomTime(1, 5))
+            console.log(this.queue)
+            if (!this.queue.length) {
+              clearInterval(timerId, 0)
+              this.clearModel()
+            }
+          }
+        })
+      })
+    }
+  }
 }
 
-checkFreeBase =(item)=> {   
-  const deletePerson = queue.shift()
-  item.changeState()
-  console.log(deletePerson)
+class View {
+  constructor(wrapper) {
+    this.wrapper = wrapper
+  }
+
+  start() {
+    this.buttons = document.createElement("div")
+    this.buttons.className = "buttons"
+    this.wrapper.appendChild(this.buttons)
+    this.buttonStart = document.createElement("button")
+    this.buttonStart.className = "start"
+    this.buttons.append(this.buttonStart)
+    this.buttonStart.innerText = "Start"
+    this.buttonStop = document.createElement("button")
+    this.buttonStop.className = "stop"
+    this.buttons.append(this.buttonStop)
+    this.buttonStop.innerText = "Stop"
+
+    this.atmBlock = document.createElement("div")
+    this.atmBlock.className = "atmBlock"
+    wrapper.appendChild(this.atmBlock)
+
+    this.queue = document.createElement("div")
+    this.queue.className = "queue"
+    wrapper.appendChild(this.queue)
+  }
+
+  createATM(arrATM) {
+    if (!this.atmBlock.children.length) {
+      arrATM.forEach(() => {
+        const atm = document.createElement("div")
+        atm.className = "atm"
+        this.atmBlock.append(atm)
+      })
+    }
+  }
+
+  addPersonView(newPerson) {
+    const person = newPerson
+    this.queue.append(person.viewPerson())
+  }
+
+  deletePersonView() {
+    this.queue.children[0].remove()
+  }
+
+  serveATM(person, currentATM) {
+    for (let i = 0; i < this.atmBlock.children.length; i++) {
+      this.atmBlock.children[i].classList.remove("currentATM")
+    }
+    this.atmBlock.children[currentATM.number - 1].classList.add("currentATM")
+    this.atmBlock.children[currentATM.number - 1].innerText = person.id
+  }
 }
 
-const checkFree = (end)=> {   
-  arrATM.forEach((item)=>{     
-    if(!item.state) { 
-      checkFreeBase(item)          
-     setTimeout(()=>item.changeState(),2000)     
-    }    
-  }) 
-  console.log(queue)  
-}
+const view = new View(wrapper)
+const model = new Model(view)
+const controller = new Controller(model, wrapper)
 
-const checkFree2 = ()=> {
-  if(queue.length) {
-    const timerId = setInterval(()=>{
-      arrATM.forEach((item)=>{     
-        if(!item.state) { 
-        checkFreeBase(item)          
-        setTimeout(()=>item.changeState(),2000)
-        if(!queue.length) clearInterval(timerId, 0)   
-        }    
-      })   
-  })     
-   }
-}
-
-const createPerson = () => {
-  queue = queue.concat(new Person(id))
-  id++
-  if (id > 10) {
-    clearInterval(timerId, 0)     
-      checkFree2()  
-    }  
-  console.log(queue)
-  checkFree();
-}
-
-let timerId = setInterval(() =>  {
-  createPerson()
-}, (Math.random() * 1000))
+view.start()
+controller.start()
