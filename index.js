@@ -109,7 +109,10 @@ class Model {
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && this.queue[0]) {
         this.checkFreeBase(currentATM)
-        setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(2, 5))
+        setTimeout(
+          () => currentATM.changeState(),
+          this.deletePerson.serveTime(2, 5)
+        )
       }
     })
     console.log(this.queue)
@@ -119,9 +122,12 @@ class Model {
     if (this.queue.length) {
       const timerId = setInterval(() => {
         this.arrATM.forEach(item => {
-          if (!item.state && this.queue[0]) {            
+          if (!item.state && this.queue[0]) {
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), this.deletePerson.serveTime(2, 5))
+            setTimeout(
+              () => item.changeState(),
+              this.deletePerson.serveTime(2, 5)
+            )
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
@@ -144,19 +150,18 @@ class Model {
 
   plusATM() {
     this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
-    
+
     console.log(this.arrATM)
     this.view.plusATM(this.arrATM)
   }
 
   minusATM() {
-    if(this.arrATM[0]) {
+    if (this.arrATM[0]) {
       this.arrATM.pop()
-    this.numberATM--    
-    this.view.minusATM(this.arrATM)
-    console.log(this.numberATM)
-    }   
-  
+      this.numberATM--
+      this.view.minusATM(this.arrATM)
+      console.log(this.numberATM)
+    }
   }
 
   clearModel() {
@@ -252,7 +257,7 @@ class View {
     this.createATM()
   }
 
-  minusATM() {    
+  minusATM() {
     this.atmBlock.children[this.atmBlock.children.length - 1].remove()
   }
 }
