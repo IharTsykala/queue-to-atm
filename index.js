@@ -88,6 +88,7 @@ class Model {
     this.view.addPersonView(person)
     this.idPerson++
     if (this.idPerson > 100) {
+      console.log(this.idPerson)
       clearInterval(this.timerId, 0)
       this.checkFree2()
     }
@@ -132,6 +133,7 @@ class Model {
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
+              console.log(this.idPerson)
               this.clearModel()
             }
           }
