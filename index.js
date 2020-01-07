@@ -68,6 +68,7 @@ class Model {
       this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
     }
     this.view.createFirstATM(this.arrATM)
+    return this.arrATM
   }
 
   startQueue() {

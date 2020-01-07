@@ -17,7 +17,7 @@ class Person {
   }
   serveTime(min, max) {
     let rand = min - 0.5 + Math.random() * (max - min + 1)
-    return Math.round(rand) * 300
+    return Math.round(rand) * 3000
   }
   viewPerson() {
     const person = document.createElement("div")
@@ -76,14 +76,14 @@ class Model extends EventEmitter {
 
   randomTime(min, max) {
     let rand = min - 0.5 + Math.random() * (max - min + 1)
-    return Math.round(rand) * 100
+    return Math.round(rand) * 1000
   }
 
   // This logic I need change!
 
   addPersonQueue() {
-    const person = new Person(this.idPerson)
-    this.queue = this.queue.concat(person)
+    const newPerson = new Person(this.idPerson)
+    this.queue = this.queue.concat(newPerson)
     // this.view.addPersonView(person)
     this.idPerson++
     // if (this.idPerson > 100) {
@@ -91,27 +91,47 @@ class Model extends EventEmitter {
     //   this.checkFree2()
     // }
     console.log(this.queue)
-    // if queue have first member
-    // if (this.queue.length) {
-    //   this.checkFree()
-    // }
-    return person
+    // if person first member
+    if (newPerson.id === this.queue[0].id) {
+      console.log(this.queue)
+      const deletePersonQueue = this.deletePersonQueue(newPerson)
+      return deletePersonQueue
+    }
+    return [newPerson]
   }
 
-  deletePersonQueue() {
-    let deletePerson
+  deletePersonQueue(newPerson) {
+    let deletePersonQueue
     let currentServeATM
     this.arrATM.forEach(currentATM => {
-      if (!currentATM.state && this.queue[0]) {
-        deletePerson = this.queue.shift()
-        // this.goToATM(currentATM)
+      if (!currentATM.state && this.queue.length) {
+        deletePersonQueue = this.queue.shift()
         currentATM.changeState()
         currentServeATM = currentATM
-        setTimeout(() => currentATM.changeState(), deletePerson.serveTime(1, 5))
+        setTimeout(
+          () => currentATM.changeState(),
+          deletePersonQueue.serveTime(1, 3)
+        )
       }
     })
+    if (!deletePersonQueue && newPerson) {
+      console.log(newPerson)
+      return [newPerson]
+    }
     console.log(this.queue)
-    return { deletePerson, currentServeATM }
+    console.log(deletePersonQueue)
+    return [deletePersonQueue, currentServeATM]
+  }
+
+  plusATM() {
+    this.arrATM = this.arrATM.concat([new ATM(this.numberATM++)])
+  }
+
+  minusATM() {
+    if (this.arrATM[0]) {
+      this.arrATM.pop()
+      this.numberATM--
+    }
   }
 }
 
@@ -186,21 +206,29 @@ class View extends EventEmitter {
   }
 
   addPersonView(newPerson) {
-    this.queue.append(newPerson.viewPerson())
+    if (newPerson) {
+      this.queue.append(newPerson.viewPerson())
+    }
   }
 
   deletePersonView() {
-    this.queue.children[0].remove()
+    console.log(this.queue.length)
+    if (this.queue.children[0]) {
+      this.queue.children[0].remove()
+      console.log(this.queue.length)
+    }
   }
 
   goToATM(person, currentServeATM) {
-    for (let i = 0; i < this.atmBlock.children.length; i++) {
-      this.atmBlock.children[i].classList.remove("currentATM")
+    if (person && currentServeATM) {
+      for (let i = 0; i < this.atmBlock.children.length; i++) {
+        this.atmBlock.children[i].classList.remove("currentATM")
+      }
+      this.atmBlock.children[currentServeATM.number - 1].classList.add(
+        "currentATM"
+      )
+      this.atmBlock.children[currentServeATM.number - 1].innerText = person.id
     }
-    this.atmBlock.children[currentServeATM.number - 1].classList.add(
-      "currentATM"
-    )
-    this.atmBlock.children[currentServeATM.number - 1].innerText = person.id
   }
 
   plusATM() {
@@ -230,10 +258,10 @@ class Controller extends EventEmitter {
     this.buttonStop.addEventListener("click", () => this.stopProgram())
 
     this.buttonPlusATM = wrapper.querySelector(".plusATM")
-    this.buttonPlusATM.addEventListener("click", () => this.model.plusATM())
+    this.buttonPlusATM.addEventListener("click", () => this.plusATM())
 
     this.buttonMinusATM = wrapper.querySelector(".minusATM")
-    this.buttonMinusATM.addEventListener("click", () => this.model.minusATM())
+    this.buttonMinusATM.addEventListener("click", () => this.minusATM())
   }
 
   startProgram() {
@@ -244,20 +272,75 @@ class Controller extends EventEmitter {
   }
 
   startQueue() {
-    this.timerId = setInterval(() => {
+    this.createQueue = setInterval(() => {
       const person = this.model.addPersonQueue()
-      this.view.addPersonView(person)
+      const [newPerson, currentServeATM] = person
+      this.view.addPersonView(newPerson)
+      console.log(newPerson)
+      console.log(newPerson, currentServeATM)
+      this.view.goToATM(newPerson, currentServeATM)
+      if (currentServeATM) {
+        this.view.deletePersonView()
+      }
     }, this.model.randomTime(1, 5))
-    this.timerId2 = setInterval(() => {
-      const { deletePerson, currentServeATM } = this.model.deletePersonQueue()
-      this.view.deletePersonView()
-      this.view.goToATM(deletePerson, currentServeATM)
+    this.checkStateATM = setInterval(() => {
+      const [deletePerson, currentServeATM] = this.model.deletePersonQueue()
+      console.log(deletePerson)
+      if (deletePerson) {
+        console.log(deletePerson)
+        this.view.deletePersonView()
+        this.view.goToATM(deletePerson, currentServeATM)
+      }
     }, this.model.randomTime(1, 5))
   }
 
+  // startQueue() {
+  //   this.createQueue = setInterval(() => {
+  //     const person = this.model.addPersonQueue()
+  //     const [newPerson, currentServeATM] = person
+  //     this.view.addPersonView(newPerson)
+  //     console.log(newPerson)
+  //     console.log(newPerson, currentServeATM)
+  //     this.view.goToATM(newPerson, currentServeATM)
+  //     if (currentServeATM) {
+  //       this.view.deletePersonView()
+  //     }
+  //   }, this.model.randomTime(1, 5))
+  //   // this.checkStateATM = setInterval(() => {
+  //   //   const [deletePerson, currentServeATM] = this.model.deletePersonQueue()
+  //   //   console.log(deletePerson)
+  //   //   if (deletePerson) {
+  //   //     console.log(deletePerson)
+  //   //     this.view.deletePersonView()
+  //   //     this.view.goToATM(deletePerson, currentServeATM)
+  //   //   }
+  //   // }, this.model.randomTime(1, 5))
+  // }
+
+  startQueue() {
+    let count = 0
+    const self = this
+    this.createQueue = setTimeout(function f() {
+      console.log(count)
+      const person = self.model.addPersonQueue()
+      const [newPerson, currentServeATM] = person
+      self.view.addPersonView(newPerson)
+      console.log(newPerson)
+      console.log(newPerson, currentServeATM)
+      self.view.goToATM(newPerson, currentServeATM)
+      if (currentServeATM) {
+        self.view.deletePersonView()
+      }
+      count++
+      if (count === 10) clearTimeout(this.createQueue, 0)
+      setTimeout(f(), this.model.randomTime(3, 10))
+      return
+    }, this.model.randomTime(1, 2))
+  }
+
   stopProgram() {
-    clearInterval(this.timerId, 0)
-    clearInterval(this.timerId2, 0)
+    clearTimeout(this.createQueue, 0)
+    clearInterval(this.checkStateATM, 0)
     this.model.clearModel()
     this.view.deleteBlocks()
     this.view.createBlockATM()
@@ -265,13 +348,13 @@ class Controller extends EventEmitter {
   }
 
   plusATM() {
-    const arrATM = this.model.plusATM()
-    this.view.plusATM(arrATM)
+    this.model.plusATM()
+    this.view.plusATM()
   }
 
   minusATM() {
-    const arrATM = minusATM()
-    this.view.minusATM(arrATM)
+    this.model.minusATM()
+    this.view.minusATM()
   }
 }
 
