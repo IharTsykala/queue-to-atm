@@ -63,7 +63,6 @@ class Model extends EventEmitter {
   createArrATM() {
     for (let i = 0; i < this.amountATM; i++) {
       this.arrATM = this.arrATM.concat([new ATM(this.numberATM++)])
-      
     }
     return this.arrATM
   }
@@ -77,42 +76,25 @@ class Model extends EventEmitter {
 
   addPersonQueue() {
     const newPerson = new Person(this.idPerson)
-    this.queue = this.queue.concat(newPerson)    
+    this.queue = this.queue.concat(newPerson)
     this.idPerson++
     console.log(this.queue)
     // console.log(newPerson === this.queue[1])
     // if person first member
-    if (newPerson === this.queue[0]) {      
-      const deletePersonQueue = this.deletePersonQueueStart(newPerson)      
-      if(deletePersonQueue[0]) {
+    if (newPerson === this.queue[0]) {
+      const deletePersonQueue = this.deletePersonQueueStart(newPerson)
+      if (deletePersonQueue[0]) {
         return deletePersonQueue
-      }      
+      }
     }
     return [newPerson]
-  } 
-
-  deletePersonQueueStart(newPerson) {    
-    let deletePersonQueue
-    let currentServeATM
-    this.arrATM.forEach(currentATM => {
-      if (!currentATM.state &&  newPerson === this.queue[0]) {      
-        deletePersonQueue = this.queue.shift()
-        currentATM.changeState()
-        currentServeATM = currentATM
-        setTimeout(
-          () =>  currentATM.changeState(),
-          deletePersonQueue.serveTime(1, 3)
-        )        
-      }
-    })     
-        return [deletePersonQueue, currentServeATM]
   }
 
-  deletePersonQueueATM() {
+  deletePersonQueueStart(newPerson) {
     let deletePersonQueue
     let currentServeATM
     this.arrATM.forEach(currentATM => {
-      if (!currentATM.state &&  this.queue[0]) {
+      if (!currentATM.state && newPerson === this.queue[0]) {
         deletePersonQueue = this.queue.shift()
         currentATM.changeState()
         currentServeATM = currentATM
@@ -121,9 +103,26 @@ class Model extends EventEmitter {
           deletePersonQueue.serveTime(1, 3)
         )
       }
-    })    
+    })
+    return [deletePersonQueue, currentServeATM]
+  }
+
+  deletePersonQueueATM() {
+    let deletePersonQueue
+    let currentServeATM
+    this.arrATM.forEach(currentATM => {
+      if (!currentATM.state && this.queue[0]) {
+        deletePersonQueue = this.queue.shift()
+        currentATM.changeState()
+        currentServeATM = currentATM
+        setTimeout(
+          () => currentATM.changeState(),
+          deletePersonQueue.serveTime(1, 3)
+        )
+      }
+    })
     console.log(this.queue)
-    console.log(deletePersonQueue)    
+    console.log(deletePersonQueue)
     return [deletePersonQueue, currentServeATM]
   }
 
@@ -207,11 +206,11 @@ class View extends EventEmitter {
     }
   }
 
-  deletePersonView( deletePerson) {
+  deletePersonView(deletePerson) {
     console.log(this.queue.children)
     // if (this.queue.children[0]) {
-      deletePerson.person.remove()
-      console.log(this.queue.children)
+    deletePerson.person.remove()
+    console.log(this.queue.children)
     // }
   }
 
@@ -272,25 +271,61 @@ class Controller extends EventEmitter {
       const person = this.model.addPersonQueue()
       console.log(person)
       const [newPerson, currentServeATM] = person
-      this.view.addPersonView(newPerson)      
+      this.view.addPersonView(newPerson)
       this.view.goToATM(newPerson, currentServeATM)
       if (currentServeATM) {
         this.view.deletePersonView(newPerson)
       }
     }, this.model.randomTime(1, 3))
     this.checkStateATM = setInterval(() => {
-      const [deletePerson, currentServeATM] = this.model.deletePersonQueueATM()      
-      if (deletePerson) {       
+      const [deletePerson, currentServeATM] = this.model.deletePersonQueueATM()
+      if (deletePerson) {
         this.view.deletePersonView(deletePerson)
         this.view.goToATM(deletePerson, currentServeATM)
       }
     }, this.model.randomTime(1, 3))
-  }
 
+    // const self = this
+    // let count = 0
+    // this.createQueue = setTimeout(function f() {
+    //   console.log(count++)
+    //   const person = self.model.addPersonQueue()
+    //   const [newPerson, currentServeATM] = person
+    //   self.view.addPersonView(newPerson)
+    //   self.view.goToATM(newPerson, currentServeATM)
+    //   if (currentServeATM) {
+    //     self.view.deletePersonView(newPerson)
+    //   }
+    //   self.model.randomTime(1, 3)
+    //   if (count < 15) {
+    //     self.createQueue = setTimeout(f, self.model.randomTime(1, 3))
+    //   } else {
+    //     return clearTimeout(self.createQueue)
+    //   }
+    //   return
+    // }, 1000)
+
+    // let count2 = 0
+    // this.clearQueue = setTimeout(function f2() {
+    //   console.log(count2++)
+    //   const [deletePerson, currentServeATM] = self.model.deletePersonQueueATM()
+    //   if (deletePerson) {
+    //     self.view.deletePersonView(deletePerson)
+    //     self.view.goToATM(deletePerson, currentServeATM)
+    //   }
+    //   self.model.randomTime(1, 3)
+    //   if (count2 < 15) {
+    //     self.clearQueue = setTimeout(f2, self.model.randomTime(1, 3))
+    //   } else {
+    //     return clearTimeout(self.clearQueue)
+    //   }
+    //   return
+    // }, 1000)
+  }
 
   stopProgram() {
     clearTimeout(this.createQueue, 0)
-    clearInterval(this.checkStateATM, 0)
+    clearTimeout(this.clearQueue, 0)
     this.model.clearModel()
     this.view.deleteBlocks()
     this.view.createBlockATM()
