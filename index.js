@@ -92,7 +92,7 @@ class Model {
     }
     console.log(this.queue)
     // if queue have first member
-    if (this.queue.length) {
+    if (this.queue.length===1) {
       this.checkFree()
     }
   }
@@ -109,7 +109,7 @@ class Model {
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && this.queue[0]) {
         this.checkFreeBase(currentATM)
-        setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(2, 5))
+        setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(2, 10))
       }
     })
     console.log(this.queue)
@@ -121,7 +121,7 @@ class Model {
         this.arrATM.forEach(item => {
           if (!item.state && this.queue[0]) {            
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), this.deletePerson.serveTime(2, 5))
+            setTimeout(() => item.changeState(), this.deletePerson.serveTime(2, 10))
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
@@ -263,3 +263,7 @@ const controller = new Controller(model, wrapper)
 
 view.start()
 controller.initial()
+
+
+// 1. Сделать событие, если стэйт банкомата фолс, запускается проверка если кто в очереди и если есть то удаление первого человека из очереди
+// 2. при создание очереди запускать проверку, какой номер у вновь пришедшего и если он первый то запускать проверку свободных банкоматов
