@@ -92,7 +92,7 @@ class Model {
     }
     console.log(this.queue)
     // if queue have first member
-    if (this.queue.length>1) {
+    if (this.queue.length) {
       this.checkFree()
     }
   }
