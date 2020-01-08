@@ -211,7 +211,7 @@ class View extends EventEmitter {
     }
   }
 
-  deletePersonView() {
+  deletePersonView() {debugger
     console.log(this.queue.length)
     if (this.queue.children[0]) {
       this.queue.children[0].remove()
@@ -317,26 +317,26 @@ class Controller extends EventEmitter {
   //   // }, this.model.randomTime(1, 5))
   // }
 
-  startQueue() {
-    let count = 0
-    const self = this
-    this.createQueue = setTimeout(function f() {
-      console.log(count)
-      const person = self.model.addPersonQueue()
-      const [newPerson, currentServeATM] = person
-      self.view.addPersonView(newPerson)
-      console.log(newPerson)
-      console.log(newPerson, currentServeATM)
-      self.view.goToATM(newPerson, currentServeATM)
-      if (currentServeATM) {
-        self.view.deletePersonView()
-      }
-      count++
-      if (count === 10) clearTimeout(this.createQueue, 0)
-      setTimeout(f(), this.model.randomTime(3, 10))
-      return
-    }, this.model.randomTime(1, 2))
-  }
+  // startQueue() {
+  //   let count = 0
+  //   const self = this
+  //   this.createQueue = setTimeout(function f() {
+  //     console.log(count)
+  //     const person = self.model.addPersonQueue()
+  //     const [newPerson, currentServeATM] = person
+  //     self.view.addPersonView(newPerson)
+  //     console.log(newPerson)
+  //     console.log(newPerson, currentServeATM)
+  //     self.view.goToATM(newPerson, currentServeATM)
+  //     if (currentServeATM) {
+  //       self.view.deletePersonView()
+  //     }
+  //     count++
+  //     if (count === 10) clearTimeout(this.createQueue, 0)
+  //     setTimeout(f(), this.model.randomTime(3, 10))
+  //     return
+  //   }, this.model.randomTime(1, 2))
+  // }
 
   stopProgram() {
     clearTimeout(this.createQueue, 0)

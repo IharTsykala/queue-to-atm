@@ -13,7 +13,7 @@ class Person {
   }
   serveTime(min, max) {
     let rand = min - 0.5 + Math.random() * (max - min + 1)
-    return Math.round(rand) * 1000
+    return Math.round(rand) * 2000
   }
   viewPerson() {
     const person = document.createElement("div")
@@ -68,13 +68,12 @@ class Model {
       this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
     }
     this.view.createFirstATM(this.arrATM)
-    return this.arrATM
   }
 
   startQueue() {
     this.timerId = setInterval(() => {
       this.createPerson()
-    }, this.randomTime(0.1, 1.0))
+    }, this.randomTime(1, 3))
   }
 
   randomTime(min, max) {
@@ -88,13 +87,12 @@ class Model {
     this.view.addPersonView(person)
     this.idPerson++
     if (this.idPerson > 100) {
-      console.log(this.idPerson)
       clearInterval(this.timerId, 0)
       this.checkFree2()
     }
     console.log(this.queue)
     // if queue have first member
-    if (this.queue.length===1) {
+    if (this.queue.length>1) {
       this.checkFree()
     }
   }
@@ -111,14 +109,7 @@ class Model {
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && this.queue[0]) {
         this.checkFreeBase(currentATM)
-<<<<<<< HEAD
         setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(2, 10))
-=======
-        setTimeout(
-          () => currentATM.changeState(),
-          this.deletePerson.serveTime(2, 5)
-        )
->>>>>>> c2e20f3e97078a982e58b8043c425d69d5732eef
       }
     })
     console.log(this.queue)
@@ -128,21 +119,13 @@ class Model {
     if (this.queue.length) {
       const timerId = setInterval(() => {
         this.arrATM.forEach(item => {
-          if (!item.state && this.queue[0]) {
+          if (!item.state && this.queue[0]) {            
             this.checkFreeBase(item)
-<<<<<<< HEAD
             setTimeout(() => item.changeState(), this.deletePerson.serveTime(2, 10))
-=======
-            setTimeout(
-              () => item.changeState(),
-              this.deletePerson.serveTime(2, 5)
-            )
->>>>>>> c2e20f3e97078a982e58b8043c425d69d5732eef
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
-              console.log(this.idPerson)
-              this.clearModel()
+              // this.clearModel()
             }
           }
         })
@@ -161,18 +144,19 @@ class Model {
 
   plusATM() {
     this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
-
+    
     console.log(this.arrATM)
     this.view.plusATM(this.arrATM)
   }
 
   minusATM() {
-    if (this.arrATM[0]) {
+    if(this.arrATM[0]) {
       this.arrATM.pop()
-      this.numberATM--
-      this.view.minusATM(this.arrATM)
-      console.log(this.numberATM)
-    }
+    this.numberATM--    
+    this.view.minusATM(this.arrATM)
+    console.log(this.numberATM)
+    }   
+  
   }
 
   clearModel() {
@@ -268,7 +252,7 @@ class View {
     this.createATM()
   }
 
-  minusATM() {
+  minusATM() {    
     this.atmBlock.children[this.atmBlock.children.length - 1].remove()
   }
 }
