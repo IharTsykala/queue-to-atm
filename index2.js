@@ -71,16 +71,12 @@ class Model extends EventEmitter {
     let rand = min - 0.5 + Math.random() * (max - min + 1)
     return Math.round(rand) * 1000
   }
-
-  // This logic I need change!
+  
 
   addPersonQueue() {
     const newPerson = new Person(this.idPerson)
     this.queue = this.queue.concat(newPerson)
-    this.idPerson++
-    console.log(this.queue)
-    // console.log(newPerson === this.queue[1])
-    // if person first member
+    this.idPerson++     
     if (newPerson === this.queue[0]) {
       const deletePersonQueue = this.deletePersonQueueStart(newPerson)
       if (deletePersonQueue[0]) {
@@ -95,12 +91,11 @@ class Model extends EventEmitter {
     let currentServeATM
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && newPerson === this.queue[0]) {
-        deletePersonQueue = this.queue.shift()
+        deletePersonQueue= this.queue.shift()
         currentATM.changeState()
         currentServeATM = currentATM
         setTimeout(
-          () => currentATM.changeState(),
-          deletePersonQueue.serveTime(1, 3)
+          () => currentATM.changeState(),deletePersonQueue.serveTime(1, 2)
         )
       }
     })
@@ -108,23 +103,26 @@ class Model extends EventEmitter {
   }
 
   deletePersonQueueATM() {
-    let deletePersonQueue
-    let currentServeATM
+    // const arrPersonATM = []
+    const deletePersonQueue = [];
+    // const currentServeATM = []
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && this.queue[0]) {
-        deletePersonQueue = this.queue.shift()
+        const arrPersonATM = []
+        const deletePerson = this.queue.shift()        
+        arrPersonATM.push(deletePerson)        
         currentATM.changeState()
-        currentServeATM = currentATM
+        arrPersonATM.push(currentATM)
+        deletePersonQueue.push(arrPersonATM)
         setTimeout(
-          () => currentATM.changeState(),
-          deletePersonQueue.serveTime(1, 3)
+          () => currentATM.changeState(),deletePerson.serveTime(1, 2)
         )
+
       }
-    })
-    console.log(this.queue)
-    console.log(deletePersonQueue)
-    return [deletePersonQueue, currentServeATM]
+    })    
+    return deletePersonQueue
   }
+
 
   plusATM() {
     this.arrATM = this.arrATM.concat([new ATM(this.numberATM++)])
@@ -200,21 +198,19 @@ class View extends EventEmitter {
     this.queue.remove()
   }
 
-  addPersonView(newPerson) {
+  addPersonView(newPerson) {    
     if (newPerson) {
       this.queue.append(newPerson.viewPerson())
     }
   }
 
-  deletePersonView(deletePerson) {
-    console.log(this.queue.children)
-    // if (this.queue.children[0]) {
-    deletePerson.person.remove()
-    console.log(this.queue.children)
-    // }
+  deletePersonView(deletePerson) { 
+    deletePerson.person.remove()       
   }
 
-  goToATM(person, currentServeATM) {
+
+
+  goToATM(person, currentServeATM) {    
     if (person && currentServeATM) {
       for (let i = 0; i < this.atmBlock.children.length; i++) {
         this.atmBlock.children[i].classList.remove("currentATM")
@@ -266,61 +262,34 @@ class Controller extends EventEmitter {
     this.startQueue()
   }
 
-  startQueue() {
-    this.createQueue = setInterval(() => {
-      const person = this.model.addPersonQueue()
-      console.log(person)
+  startQueue() {  
+
+    const self = this    
+    this.createQueue = setTimeout(function f() {      
+      const person = self.model.addPersonQueue()
       const [newPerson, currentServeATM] = person
-      this.view.addPersonView(newPerson)
-      this.view.goToATM(newPerson, currentServeATM)
+      self.view.addPersonView(newPerson)
+      self.view.goToATM(newPerson, currentServeATM)
       if (currentServeATM) {
-        this.view.deletePersonView(newPerson)
-      }
-    }, this.model.randomTime(1, 3))
-    this.checkStateATM = setInterval(() => {
-      const [deletePerson, currentServeATM] = this.model.deletePersonQueueATM()
-      if (deletePerson) {
-        this.view.deletePersonView(deletePerson)
-        this.view.goToATM(deletePerson, currentServeATM)
-      }
-    }, this.model.randomTime(1, 3))
+        self.view.deletePersonView(newPerson)
+      }   
+      self.createQueue = setTimeout(f, self.model.randomTime(0,1))      
+      return
+    }, 100)
 
-    // const self = this
-    // let count = 0
-    // this.createQueue = setTimeout(function f() {
-    //   console.log(count++)
-    //   const person = self.model.addPersonQueue()
-    //   const [newPerson, currentServeATM] = person
-    //   self.view.addPersonView(newPerson)
-    //   self.view.goToATM(newPerson, currentServeATM)
-    //   if (currentServeATM) {
-    //     self.view.deletePersonView(newPerson)
-    //   }
-    //   self.model.randomTime(1, 3)
-    //   if (count < 15) {
-    //     self.createQueue = setTimeout(f, self.model.randomTime(1, 3))
-    //   } else {
-    //     return clearTimeout(self.createQueue)
-    //   }
-    //   return
-    // }, 1000)
-
-    // let count2 = 0
-    // this.clearQueue = setTimeout(function f2() {
-    //   console.log(count2++)
-    //   const [deletePerson, currentServeATM] = self.model.deletePersonQueueATM()
-    //   if (deletePerson) {
-    //     self.view.deletePersonView(deletePerson)
-    //     self.view.goToATM(deletePerson, currentServeATM)
-    //   }
-    //   self.model.randomTime(1, 3)
-    //   if (count2 < 15) {
-    //     self.clearQueue = setTimeout(f2, self.model.randomTime(1, 3))
-    //   } else {
-    //     return clearTimeout(self.clearQueue)
-    //   }
-    //   return
-    // }, 1000)
+    this.clearQueue = setTimeout(function f2() {  
+        
+      const deletePersonCurrentServeATM = self.model.deletePersonQueueATM()      
+      if (deletePersonCurrentServeATM[0]) {
+        deletePersonCurrentServeATM.forEach((arr) => {
+          const [person, currentServeATM] = arr
+          self.view.deletePersonView(person)
+          self.view.goToATM(person, currentServeATM)
+        })        
+      }      
+        self.clearQueue = setTimeout(f2, self.model.randomTime(0, 1))      
+      return
+    }, 100)
   }
 
   stopProgram() {

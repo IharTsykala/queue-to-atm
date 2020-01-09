@@ -16,10 +16,10 @@ class Person {
     return Math.round(rand) * 2000
   }
   viewPerson() {
-    const person = document.createElement("div")
-    person.className = `person${this.id}`
-    person.innerHTML = this.id
-    return person
+    this.person = document.createElement("div")
+    this.person.className = `person${this.id}`
+    this.person.innerHTML = this.id
+    return this.person
   }
 }
 
@@ -109,7 +109,7 @@ class Model {
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && this.queue[0]) {
         this.checkFreeBase(currentATM)
-        setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(2, 10))
+        setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(1, 2))
       }
     })
     console.log(this.queue)
@@ -121,7 +121,7 @@ class Model {
         this.arrATM.forEach(item => {
           if (!item.state && this.queue[0]) {            
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), this.deletePerson.serveTime(2, 10))
+            setTimeout(() => item.changeState(), this.deletePerson.serveTime(1, 2))
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
