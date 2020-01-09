@@ -109,7 +109,10 @@ class Model {
     this.arrATM.forEach(currentATM => {
       if (!currentATM.state && this.queue[0]) {
         this.checkFreeBase(currentATM)
-        setTimeout(() => currentATM.changeState(), this.deletePerson.serveTime(1, 2))
+        setTimeout(
+          () => currentATM.changeState(),
+          this.deletePerson.serveTime(1, 2)
+        )
       }
     })
     console.log(this.queue)
@@ -119,9 +122,12 @@ class Model {
     if (this.queue.length) {
       const timerId = setInterval(() => {
         this.arrATM.forEach(item => {
-          if (!item.state && this.queue[0]) {            
+          if (!item.state && this.queue[0]) {
             this.checkFreeBase(item)
-            setTimeout(() => item.changeState(), this.deletePerson.serveTime(1, 2))
+            setTimeout(
+              () => item.changeState(),
+              this.deletePerson.serveTime(1, 2)
+            )
             console.log(this.queue)
             if (!this.queue.length) {
               clearInterval(timerId, 0)
@@ -144,19 +150,18 @@ class Model {
 
   plusATM() {
     this.arrATM = this.arrATM.concat([new ModelATM(this.numberATM++)])
-    
+
     console.log(this.arrATM)
     this.view.plusATM(this.arrATM)
   }
 
   minusATM() {
-    if(this.arrATM[0]) {
+    if (this.arrATM[0]) {
       this.arrATM.pop()
-    this.numberATM--    
-    this.view.minusATM(this.arrATM)
-    console.log(this.numberATM)
-    }   
-  
+      this.numberATM--
+      this.view.minusATM(this.arrATM)
+      console.log(this.numberATM)
+    }
   }
 
   clearModel() {
@@ -252,7 +257,7 @@ class View {
     this.createATM()
   }
 
-  minusATM() {    
+  minusATM() {
     this.atmBlock.children[this.atmBlock.children.length - 1].remove()
   }
 }
@@ -263,7 +268,6 @@ const controller = new Controller(model, wrapper)
 
 view.start()
 controller.initial()
-
 
 // 1. Сделать событие, если стэйт банкомата фолс, запускается проверка если кто в очереди и если есть то удаление первого человека из очереди
 // 2. при создание очереди запускать проверку, какой номер у вновь пришедшего и если он первый то запускать проверку свободных банкоматов
